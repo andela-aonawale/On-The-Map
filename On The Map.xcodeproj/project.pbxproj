@@ -114,7 +114,6 @@
 		8545664A1BE519DA00CB62E3 = {
 			isa = PBXGroup;
 			children = (
-				8545669D1BE787C300CB62E3 /* Framework */,
 				854566861BE5670700CB62E3 /* MapKit.framework */,
 				854566551BE519DA00CB62E3 /* On The Map */,
 				8545666A1BE519DA00CB62E3 /* On The MapTests */,
@@ -136,6 +135,7 @@
 		854566551BE519DA00CB62E3 /* On The Map */ = {
 			isa = PBXGroup;
 			children = (
+				8545669D1BE787C300CB62E3 /* Framework */,
 				854566561BE519DA00CB62E3 /* AppDelegate.swift */,
 				854566581BE519DA00CB62E3 /* LoginViewController.swift */,
 				854566841BE566F100CB62E3 /* MapViewController.swift */,
@@ -183,6 +183,7 @@
 				854566A41BE787E300CB62E3 /* FBSDKShareKit.framework */,
 			);
 			name = Framework;
+			path = ..;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
