@@ -139,8 +139,7 @@ class LoginViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        emailTextField.text = "ahmedonawale@yahoo.com"
-        passwordTextField.text = "pr0t0c0l"
+
         apiController = APIClient.sharedInstance
         
         /* Configure the UI */
