@@ -28,7 +28,7 @@ class APIClient {
     }
     
     private func errorWithDomain(domain: String) -> NSError {
-        let error = NSError(domain: domain, code: 0100, userInfo: nil)
+        let error = NSError(domain: domain, code: 0100, userInfo: [NSLocalizedDescriptionKey: domain])
         return error
     }
     
@@ -43,7 +43,7 @@ class APIClient {
         return parsedResult
     }
     
-    func updateStudentLocation(latitude: Double, longitude: Double, mediaURL: String, mapString: String, completionHandler: (success: Bool, error: NSError?) -> Void) {
+    func updateStudentLocationWith(latitude: Double, longitude: Double, mediaURL: String, mapString: String, completionHandler: (success: Bool, error: NSError?) -> Void) {
         /* 1. Build the URL */
         let URLComponents = NSURLComponents(string: parseBaseURLSecureString)!
         URLComponents.path = "/1/classes/StudentLocation/\(dataModel.objectID!)"
@@ -247,7 +247,7 @@ class APIClient {
             /* GUARD: Was there any data returned? */
             guard let data = data else {
                 print("No data was returned by the request!")
-                completionHandler(data: nil, error: self.errorWithDomain("No data was returned by the request!"))
+                completionHandler(data: nil, error: self.errorWithDomain("Your email or password was incorrect."))
                 return
             }
             
@@ -261,7 +261,7 @@ class APIClient {
         /* Build the URL */
         let URLComponents = NSURLComponents(string: parseBaseURLSecureString)
         URLComponents?.path = "/1/classes/StudentLocation"
-        URLComponents?.query = "limit=100&order=updatedAt"
+        URLComponents?.query = "limit=100&order=-updatedAt"
 
         let request = NSMutableURLRequest(URL: URLComponents!.URL!)
         request.addValue("QrX47CA9cyuGewLdsL7o5Eb8iug6Em8ye0dnAbIr", forHTTPHeaderField: "X-Parse-Application-Id")
@@ -306,24 +306,45 @@ class APIClient {
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.HTTPBody = requestBody.dataUsingEncoding(NSUTF8StringEncoding)
         
-        /* 4. Make the request */
-        makeRequest(request) { (data, error) -> Void in
+        let session = NSURLSession.sharedSession()
+        let task = session.dataTaskWithRequest(request) { data, response, error in
             /* GUARD: Was there an error? */
-            guard (error == nil) && (data != nil) else {
-                completionHandler(success: false, error: error)
+            guard (error == nil) else {
+                print("There was an error with your request: \(error)")
+                completionHandler(success: false, error: error!)
+                return
+            }
+            
+            /* GUARD: Did we get a successful 2XX response? */
+            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
+                if let response = response as? NSHTTPURLResponse {
+                    print("Your request returned an invalid response! Status code: \(response.statusCode)!")
+                } else if let response = response {
+                    print("Your request returned an invalid response! Response: \(response)!")
+                } else {
+                    print("Your request returned an invalid response!")
+                }
+                completionHandler(success: false, error: self.errorWithDomain("Your email or password was incorrect."))
+                return
+            }
+            
+            /* GUARD: Was there any data returned? */
+            guard let data = data else {
+                print("No data was returned by the request!")
+                completionHandler(success: false, error: self.errorWithDomain("Your email or password was incorrect."))
                 return
             }
             
             /* subset response data! */
-            let newData = data!.subdataWithRange(NSMakeRange(5, data!.length - 5))
+            let newData = data.subdataWithRange(NSMakeRange(5, data.length - 5))
             
             /* 5. Parse the data */
             guard let parsedResult = self.parseData(newData) else {
                 print("Cannot parse data from Udacity.")
-                completionHandler(success: false, error: self.errorWithDomain("Cannot parse data from Udacity."))
+                completionHandler(success: false, error: self.errorWithDomain("Cannot verify longin details from Udacity."))
                 return
             }
-
+            
             /* GUARD: Did Udacity return an error? */
             guard (parsedResult.objectForKey("status_code") == nil) else {
                 print("Udacity returned an error. See the status_code and status_message in \(parsedResult)")
@@ -336,14 +357,16 @@ class APIClient {
                 sessionID = session["id"] as? String,
                 account = parsedResult["account"] as? [String: AnyObject],
                 accountKey = account["key"] as? String else {
-                print("Cannot find key 'sessionID' in \(parsedResult)")
-                completionHandler(success: false, error: self.errorWithDomain("Cannot authenticate user."))
-                return
+                    print("Cannot find key 'sessionID' in \(parsedResult)")
+                    completionHandler(success: false, error: self.errorWithDomain("Cannot authenticate with Udacity."))
+                    return
             }
             
             self.dataModel.sessionID = sessionID
             self.getUserPublicDataFromWithAccountKey(accountKey, completionHandler: completionHandler)
         }
+        
+        task.resume()
     }
     
     func getUserPublicDataFromWithAccountKey(accountKey: String, completionHandler: (success: Bool, error: NSError?) -> Void) {

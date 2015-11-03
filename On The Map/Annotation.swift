@@ -17,7 +17,19 @@ final class Annotation: NSObject, MKAnnotation {
     var subtitle: String?
     var coordinate: CLLocationCoordinate2D
     
+    var latitude: Double {
+        return coordinate.latitude
+    }
+    
+    var longitude: Double {
+        return coordinate.longitude
+    }
+    
     // MARK: Initializers
+    
+    init(coordinate: CLLocationCoordinate2D) {
+        self.coordinate = coordinate
+    }
     
     init(firstName: String, lastName: String, mediaURL: String, coordinate: CLLocationCoordinate2D) {
         self.title = "\(firstName) \(lastName)"

@@ -24,7 +24,14 @@ class AddPinViewController: UIViewController {
     @IBOutlet weak var addressTextField: UITextField!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
-    var annotation: MKPointAnnotation!
+    @IBOutlet weak var browseButton: UIButton!
+    
+    @IBAction func browseLink(sender: UIButton) {
+        if let mediaURL = NSURL(string: linkedInURLTextField.text!) {
+            UIApplication.sharedApplication().openURL(mediaURL)
+        }
+    }
+    var annotation: Annotation!
     var apiController: APIClient!
     var isUpdating = false
 
@@ -40,33 +47,39 @@ class AddPinViewController: UIViewController {
         activityIndicator.startAnimating()
         activityIndicator.color = UIColor.blueColor()
         
-        let latitude = annotation.coordinate.latitude
-        let longitude = annotation.coordinate.longitude
+        let latitude = annotation.latitude
+        let longitude = annotation.longitude
         let mapString = addressTextField.text!
         
         if isUpdating {
-            apiController.updateStudentLocation(latitude, longitude: longitude, mediaURL: mediaURL, mapString: mapString) { success, error in
-                self.activityIndicator.stopAnimating()
+            apiController.updateStudentLocationWith(latitude, longitude: longitude, mediaURL: mediaURL, mapString: mapString) { success, error in
                 /* GUARD: Was there an error? */
                 guard (error == nil) else {
                     dispatch_async(dispatch_get_main_queue()) {
-                        self.showAlertWithTitle(error!.domain, message: nil)
+                        self.activityIndicator.stopAnimating()
+                        self.showAlertWithTitle(error!.localizedDescription, message: nil)
                     }
                     return
                 }
-                self.dismissViewControllerAnimated(true, completion: nil)
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.activityIndicator.stopAnimating()
+                    self.dismissViewControllerAnimated(true, completion: nil)
+                }
             }
         } else {
             apiController.postStudentLocationWith(latitude, longitude: longitude, mediaURL: mediaURL, mapString: mapString) { success, error in
-                self.activityIndicator.stopAnimating()
                 /* GUARD: Was there an error? */
                 guard (error == nil) else {
                     dispatch_async(dispatch_get_main_queue()) {
-                        self.showAlertWithTitle(error!.domain, message: nil)
+                        self.activityIndicator.stopAnimating()
+                        self.showAlertWithTitle(error!.localizedDescription, message: nil)
                     }
                     return
                 }
-                self.dismissViewControllerAnimated(true, completion: nil)
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.activityIndicator.stopAnimating()
+                    self.dismissViewControllerAnimated(true, completion: nil)
+                }
             }
         }
     }
@@ -81,8 +94,7 @@ class AddPinViewController: UIViewController {
     }
     
     private func addAnnotationAtCoordinate(coordinate: CLLocationCoordinate2D) {
-        annotation = MKPointAnnotation()
-        annotation.coordinate = coordinate
+        annotation = Annotation(coordinate: coordinate)
         mapView.addAnnotation(annotation)
         mapView.showAnnotations([annotation], animated: true)
     }
@@ -100,7 +112,7 @@ class AddPinViewController: UIViewController {
             /* GUARD: Was there an error? */
             guard (error == nil), let location = placemarks?.first?.location else {
                 dispatch_async(dispatch_get_main_queue()) {
-                    self.showAlertWithTitle("Cannot find the your address on the Map.", message: nil)
+                    self.showAlertWithTitle("Cannot find your address on the Map.", message: nil)
                 }
                 return
             }
@@ -118,6 +130,7 @@ class AddPinViewController: UIViewController {
         mapView.hidden = !mapView.hidden
         linkedInURLTextField.hidden = !linkedInURLTextField.hidden
         submitButton.hidden = !submitButton.hidden
+        browseButton.hidden = !browseButton.hidden
     }
     
     override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {

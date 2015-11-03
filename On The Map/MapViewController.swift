@@ -15,14 +15,44 @@ class MapViewController: UIViewController {
     
     // MARK: Properties
     
-    var apiController: APIClient!
+    var apiClient: APIClient!
     var dataModel: DataModel!
     @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView! {
+        didSet {
+            activityIndicator.stopAnimating()
+        }
+    }
     
     @IBAction func logout(sender: UIBarButtonItem) {
         dismissViewControllerAnimated(true) {
-            self.apiController.logOut()
+            self.apiClient.logOut()
             FBSDKLoginManager().logOut()
+        }
+    }
+    
+    @IBAction func refreshStudentLocations(sender: UIBarButtonItem) {
+        activityIndicator.startAnimating()
+        sender.enabled = false
+        apiClient.fetchRecentStudentsLocation { result, error in
+            dispatch_async(dispatch_get_main_queue()) {
+                self.activityIndicator.stopAnimating()
+                sender.enabled = true
+                /* GUARD: Was there an error? */
+                guard (error == nil) else {
+                    let alert = UIAlertController(title: "Unable to download recent student locations", message: nil, preferredStyle: .Alert)
+                    alert.addAction(UIAlertAction(title: "Cancel", style: .Cancel, handler: nil))
+                    self.presentViewController(alert, animated: true, completion: nil)
+                    return
+                }
+                guard let result = result else {
+                    return
+                }
+                let annotations = self.annotationsFromData(result)
+                self.mapView.removeAnnotations(self.mapView.annotations)
+                self.mapView.addAnnotations(annotations)
+                self.loadHardcodedStudentsData()
+            }
         }
     }
     
@@ -55,14 +85,12 @@ class MapViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        apiController = APIClient.sharedInstance
+        
+        apiClient = APIClient.sharedInstance
         dataModel = DataModel.sharedInstance
         
         downloadStudentsLocationsFromParse()
-        let annotations = annotationsFromData(hardCodedLocationData())
-        mapView.addAnnotations(annotations)
-        mapView.showAnnotations(annotations, animated: true)
+        loadHardcodedStudentsData()
     }
 
     override func didReceiveMemoryWarning() {
@@ -106,20 +134,28 @@ extension MapViewController: MKMapViewDelegate {
 extension MapViewController {
     
     private func downloadStudentsLocationsFromParse() {
-        apiController.fetchRecentStudentsLocation { result, error in
-            /* GUARD: Was there an error? */
-            guard (error == nil) else {
-                let alert = UIAlertController(title: "Unable to download recent student locations", message: nil, preferredStyle: .Alert)
-                alert.addAction(UIAlertAction(title: "Cancel", style: .Cancel, handler: nil))
-                self.presentViewController(alert, animated: true, completion: nil)
-                return
+        apiClient.fetchRecentStudentsLocation { result, error in
+            dispatch_async(dispatch_get_main_queue()) {
+                /* GUARD: Was there an error? */
+                guard (error == nil) else {
+                    let alert = UIAlertController(title: "Unable to download recent student locations", message: nil, preferredStyle: .Alert)
+                    alert.addAction(UIAlertAction(title: "Cancel", style: .Cancel, handler: nil))
+                    self.presentViewController(alert, animated: true, completion: nil)
+                    return
+                }
+                guard let result = result else {
+                    return
+                }
+                let annotations = self.annotationsFromData(result)
+                self.mapView.addAnnotations(annotations)
             }
-            guard let result = result else {
-                return
-            }
-            let annotations = self.annotationsFromData(result)
-            self.mapView.addAnnotations(annotations)
         }
+    }
+    
+    private func loadHardcodedStudentsData() {
+        let annotations = annotationsFromData(hardCodedLocationData())
+        mapView.addAnnotations(annotations)
+        mapView.showAnnotations(annotations, animated: true)
     }
     
     private func annotationForStudent(student: StudentInformation) -> Annotation {

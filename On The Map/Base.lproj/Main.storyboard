@@ -46,10 +46,6 @@
                                                 <real key="value" value="13"/>
                                             </userDefinedRuntimeAttribute>
                                         </userDefinedRuntimeAttributes>
-                                        <connections>
-                                            <action selector="textFieldDidChange:" destination="BYZ-38-t0r" eventType="editingChanged" id="rOQ-9k-UqE"/>
-                                            <action selector="textFieldShouldReturn:" destination="BYZ-38-t0r" eventType="editingDidEndOnExit" id="sA6-0C-bEV"/>
-                                        </connections>
                                     </textField>
                                     <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Password" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="SSC-Vs-Ukw">
                                         <rect key="frame" x="0.0" y="48" width="288" height="40"/>
@@ -65,10 +61,6 @@
                                                 <real key="value" value="13"/>
                                             </userDefinedRuntimeAttribute>
                                         </userDefinedRuntimeAttributes>
-                                        <connections>
-                                            <action selector="textFieldDidChange:" destination="BYZ-38-t0r" eventType="editingChanged" id="HGj-hc-8Jn"/>
-                                            <action selector="textFieldShouldReturn:" destination="BYZ-38-t0r" eventType="editingDidEndOnExit" id="c0d-gw-xh8"/>
-                                        </connections>
                                     </textField>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HYH-52-z2W">
                                         <rect key="frame" x="0.0" y="96" width="288" height="40"/>
@@ -180,12 +172,19 @@
                                     <outlet property="delegate" destination="jD9-kV-Z4D" id="KZL-Dc-Jiv"/>
                                 </connections>
                             </mapView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="Hm9-3M-xgd">
+                                <rect key="frame" x="142" y="265" width="37" height="37"/>
+                                <animations/>
+                                <color key="color" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                            </activityIndicatorView>
                         </subviews>
                         <animations/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="Hm9-3M-xgd" firstAttribute="centerX" secondItem="i70-6P-Eo2" secondAttribute="centerX" id="NmR-kD-xxv"/>
                             <constraint firstItem="i70-6P-Eo2" firstAttribute="leading" secondItem="hex-jd-zGe" secondAttribute="leading" id="P2d-23-65T"/>
                             <constraint firstItem="i70-6P-Eo2" firstAttribute="top" secondItem="hex-jd-zGe" secondAttribute="top" id="TJP-Qj-KsZ"/>
+                            <constraint firstItem="Hm9-3M-xgd" firstAttribute="centerY" secondItem="i70-6P-Eo2" secondAttribute="centerY" id="Y1u-Zh-nwy"/>
                             <constraint firstAttribute="bottom" secondItem="i70-6P-Eo2" secondAttribute="bottom" id="hbB-pa-9A8"/>
                             <constraint firstAttribute="trailing" secondItem="i70-6P-Eo2" secondAttribute="trailing" id="oz5-fx-Oho"/>
                         </constraints>
@@ -197,7 +196,11 @@
                             </connections>
                         </barButtonItem>
                         <rightBarButtonItems>
-                            <barButtonItem systemItem="refresh" id="yar-th-SOp"/>
+                            <barButtonItem systemItem="refresh" id="yar-th-SOp">
+                                <connections>
+                                    <action selector="refreshStudentLocations:" destination="jD9-kV-Z4D" id="rDI-1T-7IP"/>
+                                </connections>
+                            </barButtonItem>
                             <barButtonItem image="pin" id="3G0-BC-eH9">
                                 <connections>
                                     <action selector="addStudentLocation:" destination="jD9-kV-Z4D" id="wIw-Yg-Li4"/>
@@ -207,6 +210,7 @@
                     </navigationItem>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
                     <connections>
+                        <outlet property="activityIndicator" destination="Hm9-3M-xgd" id="l5k-Im-9It"/>
                         <outlet property="mapView" destination="i70-6P-Eo2" id="b0r-7i-3cG"/>
                         <segue destination="1ca-2U-2bG" kind="presentation" identifier="Add Student Location" id="EHa-lL-Qva"/>
                     </connections>
@@ -271,7 +275,11 @@
                             </connections>
                         </barButtonItem>
                         <rightBarButtonItems>
-                            <barButtonItem systemItem="refresh" id="XaB-tL-l6D"/>
+                            <barButtonItem systemItem="refresh" id="XaB-tL-l6D">
+                                <connections>
+                                    <action selector="refreshStudentLocations:" destination="csc-JA-yEz" id="GAM-Km-kxo"/>
+                                </connections>
+                            </barButtonItem>
                             <barButtonItem image="pin" id="JGf-xW-YwS">
                                 <connections>
                                     <action selector="addStudentLocation:" destination="csc-JA-yEz" id="30g-Qo-e4g"/>
@@ -300,7 +308,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <mapView hidden="YES" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="cfN-mr-ylj">
-                                <rect key="frame" x="0.0" y="169.5" width="320" height="398.5"/>
+                                <rect key="frame" x="0.0" y="169" width="320" height="398.5"/>
                                 <animations/>
                             </mapView>
                             <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qBd-9r-2Mb">
@@ -443,13 +451,26 @@
                                             <action selector="cancel:" destination="1ca-2U-2bG" eventType="touchUpInside" id="R5u-uW-s61"/>
                                         </connections>
                                     </button>
+                                    <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0eA-oD-38S">
+                                        <rect key="frame" x="8" y="23" width="52" height="30"/>
+                                        <animations/>
+                                        <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
+                                        <state key="normal" title="Browse">
+                                            <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="browseLink:" destination="1ca-2U-2bG" eventType="touchUpInside" id="t72-SX-fJW"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                                 <animations/>
                                 <color key="backgroundColor" red="0.8784313725490196" green="0.8784313725490196" blue="0.8666666666666667" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
                                     <constraint firstItem="NWC-Z7-yPd" firstAttribute="leading" secondItem="ATr-tm-PgI" secondAttribute="leading" id="5cT-JW-K2R"/>
                                     <constraint firstItem="FOb-cD-OkS" firstAttribute="centerY" secondItem="ATr-tm-PgI" secondAttribute="centerY" id="PNo-6n-eUG"/>
+                                    <constraint firstItem="0eA-oD-38S" firstAttribute="top" secondItem="ATr-tm-PgI" secondAttribute="top" constant="23" id="Rpx-uT-MRg"/>
                                     <constraint firstItem="FOb-cD-OkS" firstAttribute="leading" secondItem="ATr-tm-PgI" secondAttribute="leading" constant="8" id="TL6-nY-kFN"/>
+                                    <constraint firstItem="0eA-oD-38S" firstAttribute="leading" secondItem="ATr-tm-PgI" secondAttribute="leading" constant="8" id="WXt-FK-pML"/>
                                     <constraint firstItem="GG5-ll-zY4" firstAttribute="top" secondItem="ATr-tm-PgI" secondAttribute="top" constant="23" id="f04-r5-lEF"/>
                                     <constraint firstAttribute="bottom" secondItem="NWC-Z7-yPd" secondAttribute="bottom" constant="16" id="mqf-ed-FQ4"/>
                                     <constraint firstAttribute="trailing" secondItem="GG5-ll-zY4" secondAttribute="trailing" constant="8" id="nra-TV-y49"/>
@@ -516,6 +537,7 @@
                         <outlet property="activityIndicator" destination="TVC-ng-4au" id="4SB-gC-AdB"/>
                         <outlet property="addressTextField" destination="tJg-0T-36Z" id="Umh-QP-0u9"/>
                         <outlet property="addressView" destination="Ui8-me-bLx" id="TsE-nC-E7d"/>
+                        <outlet property="browseButton" destination="0eA-oD-38S" id="hrz-4K-3zq"/>
                         <outlet property="cancelButton" destination="GG5-ll-zY4" id="uze-Ht-IdF"/>
                         <outlet property="findOnMapView" destination="OT1-MP-uEN" id="win-lg-MyU"/>
                         <outlet property="linkedInURLTextField" destination="FOb-cD-OkS" id="sQc-U1-UVA"/>
@@ -597,6 +619,6 @@
         <image name="udacity" width="256" height="256"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="RJo-ce-5r4"/>
+        <segue reference="EHa-lL-Qva"/>
     </inferredMetricsTieBreakers>
 </document>

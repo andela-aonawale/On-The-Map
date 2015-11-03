@@ -27,18 +27,34 @@ class LoginViewController: UIViewController {
     
     @IBAction func loginWithEmail(sender: UIButton) {
         view.endEditing(true)
+        if emailTextField.text!.isEmpty || passwordTextField.text!.isEmpty {
+            shakeView(sender)
+            return
+        }
         let activityIndicator = addActivityIndicatortoButton(sender)
         sender.enabled = false
         facebookLoginButton.enabled = false
-
         apiController.loginUserWithEmail(emailTextField.text!, password: passwordTextField.text!) { success, error in
             dispatch_async(dispatch_get_main_queue()) {
                 activityIndicator.removeFromSuperview()
                 sender.enabled = true
                 self.facebookLoginButton.enabled = true
-                success ? self.completeLogin() : self.showAlertWithTitle(error!.domain)
+                success ? self.completeLogin() : {
+                    self.shakeView(sender)
+                    self.showAlertWithTitle(error!.localizedDescription)
+                }()
             }
         }
+    }
+    
+    private func shakeView(view: UIView) {
+        let animation = CABasicAnimation(keyPath: "position")
+        animation.duration = 0.07
+        animation.repeatCount = 4
+        animation.autoreverses = true
+        animation.fromValue = NSValue(CGPoint: CGPointMake(view.center.x - 10, view.center.y))
+        animation.toValue = NSValue(CGPoint: CGPointMake(view.center.x + 10, view.center.y))
+        view.layer.addAnimation(animation, forKey: "position")
     }
     
     private func addActivityIndicatortoButton(button: UIButton) -> UIActivityIndicatorView {
@@ -70,6 +86,7 @@ class LoginViewController: UIViewController {
                     activityIndicator.removeFromSuperview()
                     sender.enabled = true
                     self.emailLoginButton.enabled = true
+                    self.shakeView(sender)
                     self.showAlertWithTitle(error.localizedDescription)
                 }
                 return
@@ -92,6 +109,7 @@ class LoginViewController: UIViewController {
                     activityIndicator.removeFromSuperview()
                     sender.enabled = true
                     self.emailLoginButton.enabled = true
+                    self.shakeView(sender)
                 }
                 return
             }
@@ -101,7 +119,10 @@ class LoginViewController: UIViewController {
                     activityIndicator.removeFromSuperview()
                     sender.enabled = true
                     self.emailLoginButton.enabled = true
-                    success ? self.completeLogin() : self.showAlertWithTitle(error!.domain)
+                    success ? self.completeLogin() : {
+                        self.shakeView(sender)
+                        self.showAlertWithTitle(error!.localizedDescription)
+                    }()
                 }
             }
         }
@@ -118,7 +139,8 @@ class LoginViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        emailTextField.text = "ahmedonawale@yahoo.com"
+        passwordTextField.text = "pr0t0c0l"
         apiController = APIClient.sharedInstance
         
         /* Configure the UI */
@@ -127,7 +149,6 @@ class LoginViewController: UIViewController {
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
-        emailLoginButton.enabled = !emailTextField.text!.isEmpty && !passwordTextField.text!.isEmpty
         subscribeToKeyboardNotifications()
     }
     
@@ -145,17 +166,6 @@ class LoginViewController: UIViewController {
             return
         }
         view.endEditing(true)
-    }
-}
-
-extension LoginViewController {
-    
-    @IBAction func textFieldDidChange(sender: UITextField) {
-        emailLoginButton.enabled = !emailTextField.text!.isEmpty && !passwordTextField.text!.isEmpty
-    }
-    
-    @IBAction func textFieldShouldReturn(sender: UITextField) {
-        emailLoginButton.enabled = !emailTextField.text!.isEmpty && !passwordTextField.text!.isEmpty
     }
 }
 
@@ -224,6 +234,8 @@ extension LoginViewController {
         return keyboardSize.CGRectValue().height
     }
 }
+
+// MARK: - UITextField Extension
 
 extension UITextField {
     @IBInspectable public var leftSpacer:CGFloat {

@@ -15,12 +15,37 @@ class ListTableViewController: UITableViewController {
     // MARK: Properties
     
     var dataModel: DataModel!
-    var apiController: APIClient!
+    var apiClient: APIClient!
     
     @IBAction func logout(sender: UIBarButtonItem) {
         dismissViewControllerAnimated(true) {
-            self.apiController.logOut()
+            self.apiClient.logOut()
             FBSDKLoginManager().logOut()
+        }
+    }
+    
+    @IBAction func refreshStudentLocations(sender: UIBarButtonItem) {
+        sender.enabled = false
+        apiClient.fetchRecentStudentsLocation { result, error in
+            dispatch_async(dispatch_get_main_queue()) {
+                sender.enabled = true
+                /* GUARD: Was there an error? */
+                guard (error == nil) else {
+                    let alert = UIAlertController(title: "Unable to download recent student locations", message: nil, preferredStyle: .Alert)
+                    alert.addAction(UIAlertAction(title: "Cancel", style: .Cancel, handler: nil))
+                    self.presentViewController(alert, animated: true, completion: nil)
+                    return
+                }
+                guard let result = result else {
+                    return
+                }
+                self.dataModel.studentInformations.removeAll()
+                for student in result {
+                    let studentInformation = StudentInformation(student: student)
+                    self.dataModel.studentInformations.append(studentInformation)
+                }
+                self.tableView.reloadData()
+            }
         }
     }
     
@@ -54,7 +79,7 @@ class ListTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        apiController = APIClient.sharedInstance
+        apiClient = APIClient.sharedInstance
         dataModel = DataModel.sharedInstance
     }
 
