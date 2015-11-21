@@ -1,6 +1,6 @@
 # On-The-Map
 
-## About On-The-Map
+## Description
 On-The-Map is an iOS app that show the location where other students have reported studying on a map with pins.
 By tapping on the pin users can see a URL for something the student finds interesting.
 User will be able to add their own data by posting a string that can be reverse geocoded to a location, and a URL.
